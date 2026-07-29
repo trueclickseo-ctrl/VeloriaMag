@@ -1,0 +1,300 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String
+  pillars     Pillar[]
+  articles    Article[]
+}
+
+model Pillar {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  description String
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  articles    Article[]
+}
+
+model Author {
+  id             String    @id @default(uuid())
+  name           String
+  slug           String    @unique
+  photo          String?
+  bio            String
+  expertise      String
+  qualifications String
+  
+  // Expanded Credentials Fields
+  credentials    String?
+  expertiseAreas String?
+  yearsExperience Int      @default(0)
+  socialProfiles String?
+  publishedCount Int      @default(0)
+  reviewedCount  Int      @default(0)
+  
+  articles       Article[] @relation("AuthoredArticles")
+  reviewed       Article[] @relation("ReviewedArticles")
+}
+
+model Article {
+  id                String   @id @default(uuid())
+  title             String
+  slug              String   @unique
+  excerpt           String
+  markdownContent   String
+  featuredImage     String?
+  
+  // Relations
+  categoryId        String
+  category          Category @relation(fields: [categoryId], references: [id])
+  pillarId          String?
+  pillar            Pillar?  @relation(fields: [pillarId], references: [id])
+  
+  topicCluster      String
+  primaryKeyword    String
+  secondaryKeywords String   // Comma-separated or JSON
+  searchIntent      String
+  schemaType        String
+  citations         String   // Comma-separated or JSON
+  entities          String   // Comma-separated or JSON
+  
+  authorId          String
+  author            Author   @relation("AuthoredArticles", fields: [authorId], references: [id])
+  reviewerId        String?
+  reviewer          Author?  @relation("ReviewedArticles", fields: [reviewerId], references: [id])
+  
+  metaTitle         String
+  metaDescription   String
+  readingTime       Int      @default(5)
+  status            String   @default("DRAFT")
+  
+  // Google Discover Fields
+  discoverTitle     String?
+  emotionalHook     String?
+  trendingTopic     String?
+  featuredAngle     String?
+  discoverImage     String?
+  socialHeadline    String?
+  
+  // Image Brief Fields
+  imageConcept      String?
+  imageStyle        String?
+  imageComposition  String?
+  imageElements     String?
+  imageAlt          String?
+  imageCaption      String?
+  
+  // Quality Scores
+  seoScore          Int      @default(0)
+  contentScore      Int      @default(0)
+  trustScore        Int      @default(0)
+  
+  // Keyword Opportunity Scoring
+  searchVolume      Int      @default(0)
+  keywordDifficulty Int      @default(0)
+  competitionLevel  String   @default("LOW")
+  entityValue       Int      @default(0)
+  topicalAuthorityValue Int @default(0)
+  internalLinkPotential Int @default(0)
+  priorityScore     Int      @default(0)
+  topicApproved     Boolean  @default(true)
+  
+  // Freshness & Refresh Alerts
+  lastFactCheckedDate DateTime?
+  
+  // Indexing Monitoring Fields
+  indexingStatus      String   @default("PENDING") // PENDING, INDEXED, NEEDS_REVIEW
+  lastCrawledDate     DateTime?
+  googleIndexed       Boolean  @default(false)
+  indexingIssues      String?  // Comma-separated or JSON details
+  canonicalStatus     String   @default("VALID")   // VALID, MISMATCH
+  
+  publishedAt       DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Entity {
+  id                String  @id @default(uuid())
+  name              String  @unique
+  type              String  // e.g. "Drug", "Brand", "Condition", "ChemicalSubstance"
+  description       String
+  relatedEntities   String  // Comma-separated or JSON of related entity names
+  officialURL       String?
+  wikipediaURL      String?
+  mentionedArticles String? // Comma-separated or JSON
+}
+
+model Product {
+  id                String  @id @default(uuid())
+  brand             String
+  name              String
+  category          String
+  affiliateUrl      String
+  disclosureStatus  String  @default("PENDING")
+}
+
+model Source {
+  id                String   @id @default(uuid())
+  name              String   @unique
+  type              String   // e.g. "Medical", "Finance", "Celebrity"
+  url               String
+  authorityLevel    String   // e.g. "HIGH", "MEDIUM"
+  lastCheckedDate   DateTime @default(now())
+}
+
+model Subscriber {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  interests         String   // Comma-separated categories
+  joinedAt          DateTime @default(now())
+}
+
+model ArticleBrief {
+  id                String   @id @default(uuid())
+  topic             String
+  keyword           String
+  category          String
+  pillar            String
+  searchIntent      String
+  audience          String
+  status            String   @default("BRIEF_READY")
+  createdAt         DateTime @default(now())
+}
+
+model ArticleProduction {
+  id                String   @id @default(uuid())
+  articleId         String   @unique
+  seoScore          Int      @default(0)
+  eeatScore         Int      @default(0)
+  entityScore       Int      @default(0)
+  citationScore     Int      @default(0)
+  internalLinkScore Int      @default(0)
+  readyToPublish    Boolean  @default(false)
+}
+
+model ContentQueue {
+  id                String   @id @default(uuid())
+  date              DateTime @unique
+  morningArticle    String
+  afternoonArticle  String
+  eveningArticle    String
+  category          String
+  status            String   @default("DRAFT")
+}
+
+model ResearchBrief {
+  id                String   @id @default(uuid())
+  articleId         String   @unique
+  serpSummary       String
+  competitorGaps    String
+  entitiesFound     String   // Comma-separated or JSON
+  questionsFound    String   // Comma-separated or JSON
+  sourcesFound      String   // Comma-separated or JSON
+}
+
+model NewsletterPreference {
+  id                String   @id @default(uuid())
+  subscriberId      String
+  frequency         String   @default("WEEKLY") // DAILY, WEEKLY, MONTHLY
+  interests         String   // Comma-separated categories
+}
+
+model Campaign {
+  id                String   @id @default(uuid())
+  subject           String
+  status            String   @default("DRAFT") // DRAFT, SENT, SCHEDULED
+  sentAt            DateTime @default(now())
+}
+
+model AnalyticsEvent {
+  id                String   @id @default(uuid())
+  eventType         String   // PAGE_VIEW, CLICK, CONVERSION
+  url               String
+  referrer          String?
+  visitorId         String
+  timestamp         DateTime @default(now())
+}
+
+model ReaderProfile {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  interests         String   // Comma-separated categories
+  savedArticles     String?  // Comma-separated or JSON slugs
+  history           String?  // Comma-separated or JSON
+  createdAt         DateTime @default(now())
+}
+
+model Recommendation {
+  id                String   @id @default(uuid())
+  articleId         String
+  recommendedSlugs  String   // Comma-separated recommended slugs
+}
+
+model AffiliateProduct {
+  id                String   @id @default(uuid())
+  productName       String
+  brand             String?
+  category          String
+  url               String
+  commission        Float    @default(0.0)
+  relatedArticles   String?  // Comma-separated
+}
+
+model RevenueRecord {
+  id                String   @id @default(uuid())
+  date              DateTime @unique
+  adRevenue         Float    @default(0.0)
+  affiliateRevenue  Float    @default(0.0)
+  rpm               Float    @default(0.0)
+  pageViews         Int      @default(0)
+}
+
+model MembershipPlan {
+  id                String   @id @default(uuid())
+  name              String   @unique
+  price             Float    @default(0.0)
+  interval          String   @default("MONTH") // MONTH, YEAR
+}
+
+model Subscription {
+  id                String   @id @default(uuid())
+  profileId         String
+  planId            String
+  status            String   @default("ACTIVE") // ACTIVE, CANCELED, EXPIRED
+  renewsAt          DateTime
+}
+
+model PaymentRecord {
+  id                String   @id @default(uuid())
+  profileId         String
+  amount            Float
+  status            String   @default("COMPLETED")
+  timestamp         DateTime @default(now())
+}
+
+model BackupLog {
+  id                String   @id @default(uuid())
+  backupType        String   // DATABASE, MEDIA, CONTENT
+  sizeBytes         Int
+  status            String   @default("COMPLETED")
+  timestamp         DateTime @default(now())
+}
+
+model SecurityLog {
+  id                String   @id @default(uuid())
+  userId            String
+  role              String
+  action            String
+  ipAddress         String?
+  timestamp         DateTime @default(now())
+}
