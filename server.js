@@ -10,7 +10,22 @@ const dev = process.env.NODE_ENV !== 'production';
 const hostname = process.env.HOST || '0.0.0.0';
 const port = parseInt(process.env.PORT || '3000', 10);
 
+const fs = require('fs');
+const path = require('path');
 
+try {
+  const envContent = Object.keys(process.env)
+    .filter(key => key.startsWith('DATABASE_') || key.startsWith('NEXT') || key.startsWith('DIRECT_') || key === 'PORT')
+    .map(key => `${key}="${process.env[key]}"`)
+    .join('\n');
+
+  if (envContent) {
+    fs.writeFileSync(path.join(__dirname, '.env.production'), envContent, 'utf-8');
+    console.log('> Synchronized environment variables to .env.production successfully.');
+  }
+} catch (err) {
+  console.error('> Failed to sync environment variables to .env.production:', err.message);
+}
 
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
