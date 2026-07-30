@@ -4,7 +4,7 @@
   "private": true,
   "main": "server.js",
   "scripts": {
-    "prebuild": "prisma generate",
+    "prebuild": "prisma generate && node prisma/deploy.js",
     "dev": "next dev",
     "build": "next build",
     "start": "node server.js",
