@@ -109,7 +109,7 @@ export default async function SlugPage({ params }: Props) {
         "@type": "Drug",
         "@id": `https://veloriamag.com/${category}/${slug}#drug`,
         "name": article.primaryKeyword,
-        "activeIngredient": article.entities.split(',').map(e => ({
+        "activeIngredient": article.entities.split(',').map((e: string) => ({
           "@type": "ChemicalSubstance",
           "name": e.trim()
         }))
@@ -201,7 +201,7 @@ export default async function SlugPage({ params }: Props) {
             <div className="mt-12 pt-6 border-t border-gray-100">
               <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-3">Sources & References</h4>
               <ul className="list-disc pl-4 text-xs text-gray-500 space-y-1 leading-relaxed">
-                {article.citations.split(',').map((cite, index) => (
+                {article.citations.split(',').map((cite: string, index: number) => (
                   <li key={index}>{cite.trim()}</li>
                 ))}
               </ul>
