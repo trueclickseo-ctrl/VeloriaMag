@@ -6,22 +6,29 @@ import { CategoryCard, ArticleCard } from '@/components/SharedComponents';
 export const revalidate = 60; // ISR cache revalidation rate: 60s
 
 export default async function Home() {
-  const categories = await prisma.category.findMany({
-    include: {
-      articles: true,
-    },
-  });
+  let categories: any[] = [];
+  let featuredArticles: any[] = [];
 
-  const featuredArticles = await prisma.article.findMany({
-    take: 6,
-    orderBy: {
-      publishedAt: 'desc',
-    },
-    include: {
-      author: true,
-      category: true,
-    },
-  });
+  try {
+    categories = await prisma.category.findMany({
+      include: {
+        articles: true,
+      },
+    });
+
+    featuredArticles = await prisma.article.findMany({
+      take: 6,
+      orderBy: {
+        publishedAt: 'desc',
+      },
+      include: {
+        author: true,
+        category: true,
+      },
+    });
+  } catch (error) {
+    console.error('Failed to fetch home page data:', error);
+  }
 
   // Category visual configurations
   const categoryStyles: Record<string, { colorClass: string; hoverColor: string }> = {

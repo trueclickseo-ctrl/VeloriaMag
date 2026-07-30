@@ -5,7 +5,12 @@ import Link from 'next/link';
 export const revalidate = 3600;
 
 export default async function EditorialTeamPage() {
-  const authors = await prisma.author.findMany({});
+  let authors: any[] = [];
+  try {
+    authors = await prisma.author.findMany({});
+  } catch (error) {
+    console.error('Failed to fetch authors for editorial team page:', error);
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-xs text-gray-600 leading-relaxed">
