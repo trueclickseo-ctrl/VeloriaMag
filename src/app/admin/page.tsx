@@ -8,51 +8,7 @@ import {
 
 export const revalidate = 0; // Dynamic rendering always
 
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-}
-
-interface Author {
-  id: string;
-  name: string;
-  qualifications?: string;
-  expertise?: string;
-  bio?: string;
-  slug?: string;
-  articles?: Article[];
-}
-
-interface Article {
-  id: string;
-  title: string;
-  slug: string;
-  publishedAt: Date;
-  seoScore?: number | null;
-  contentScore?: number | null;
-  trustScore?: number | null;
-  discoverTitle?: string | null;
-  emotionalHook?: string | null;
-  topicCluster?: string | null;
-  imageConcept?: string | null;
-  imageStyle?: string | null;
-  imageAlt?: string | null;
-  author?: Author;
-  category?: Category;
-}
-
-interface Entity {
-  id: string;
-}
-
-interface Product {
-  id: string;
-  brand: string;
-  name: string;
-  category: string;
-  disclosureStatus: string;
-}
+import { Article, Author, Entity, Product } from '@/types';
 
 
 export default async function AdminDashboard() {

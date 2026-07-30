@@ -2,21 +2,22 @@ import React from 'react';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { CategoryCard, ArticleCard } from '@/components/SharedComponents';
+import { Article, Category } from '@/types';
 
 export const revalidate = 60; // ISR cache revalidation rate: 60s
 
 export default async function Home() {
-  let categories: any[] = [];
-  let featuredArticles: any[] = [];
+  let categories: Category[] = [];
+  let featuredArticles: Article[] = [];
 
   try {
-    categories = await prisma.category.findMany({
+    categories = (await prisma.category.findMany({
       include: {
         articles: true,
       },
-    });
+    })) as Category[];
 
-    featuredArticles = await prisma.article.findMany({
+    featuredArticles = (await prisma.article.findMany({
       take: 6,
       orderBy: {
         publishedAt: 'desc',
@@ -25,7 +26,7 @@ export default async function Home() {
         author: true,
         category: true,
       },
-    });
+    })) as Article[];
   } catch (error) {
     console.error('Failed to fetch home page data:', error);
   }
@@ -69,7 +70,7 @@ export default async function Home() {
                   key={cat.id}
                   title={cat.name}
                   slug={cat.slug}
-                  count={cat.articles.length}
+                  count={cat.articles?.length || 0}
                   description={cat.description}
                   colorClass={style.colorClass}
                 />
@@ -85,16 +86,16 @@ export default async function Home() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredArticles.map((art) => {
-              const style = categoryStyles[art.category.slug] || { hoverColor: 'text-amber-600' };
+              const style = (art.category && categoryStyles[art.category.slug]) || { hoverColor: 'text-amber-600' };
               return (
                 <ArticleCard
                   key={art.id}
                   title={art.title}
                   slug={art.slug}
-                  category={art.category.slug}
+                  category={art.category?.slug || ''}
                   excerpt={art.excerpt}
                   date={art.publishedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  authorName={art.author.name}
+                  authorName={art.author?.name || 'VeloriaMag Staff'}
                   hoverColorClass={style.hoverColor}
                 />
               );

@@ -3,34 +3,7 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { ArticleCard } from '@/components/SharedComponents';
 
-interface Pillar {
-  id: string;
-  title: string;
-  description: string;
-  slug: string;
-}
-
-interface Author {
-  name: string;
-}
-
-interface Article {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  publishedAt: Date;
-  author: Author;
-}
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  pillars: Pillar[];
-  articles: Article[];
-}
+import { Category } from '@/types';
 
 interface Props {
   params: Promise<{
@@ -81,7 +54,7 @@ export default async function CategoryPage({ params }: Props) {
       </div>
 
       {/* Pillars Section */}
-      {category.pillars.length > 0 && (
+      {category.pillars && category.pillars.length > 0 && (
         <div className="mb-12">
           <h2 className="text-lg font-bold text-gray-900 mb-6 font-serif">Pillars & Guides</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -102,7 +75,7 @@ export default async function CategoryPage({ params }: Props) {
       <div>
         <h2 className="text-lg font-bold text-gray-900 mb-6 font-serif">All Articles</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {category.articles.map((art) => (
+          {category.articles?.map((art) => (
             <ArticleCard
               key={art.id}
               title={art.title}
@@ -110,7 +83,7 @@ export default async function CategoryPage({ params }: Props) {
               category={categorySlug}
               excerpt={art.excerpt}
               date={art.publishedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-              authorName={art.author.name}
+              authorName={art.author?.name || 'VeloriaMag Staff'}
               hoverColorClass={style.hover}
             />
           ))}
