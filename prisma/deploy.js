@@ -32,7 +32,7 @@ socket.on('connect', () => {
   socket.destroy();
   console.log('🔌 Database is reachable. Running migrations and seed...');
   try {
-    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+    execSync('npx prisma db push --skip-generate', { stdio: 'inherit' });
     execSync('node prisma/seed.js', { stdio: 'inherit' });
     console.log('✅ Migration and seeding completed successfully!');
   } catch (err) {
