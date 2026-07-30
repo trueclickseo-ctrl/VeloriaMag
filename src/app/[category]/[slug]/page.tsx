@@ -48,7 +48,7 @@ export default async function SlugPage({ params }: Props) {
 
         <h2 className="text-lg font-bold text-gray-900 mb-6 font-serif">Articles in this Cluster</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {pillar.articles.map((art) => (
+          {pillar.articles.map((art: any) => (
             <ArticleCard
               key={art.id}
               title={art.title}
