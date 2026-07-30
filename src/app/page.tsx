@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { CategoryCard, ArticleCard } from '@/components/SharedComponents';
 import { Article, Category } from '@/types';
 
-export const revalidate = 60; // ISR cache revalidation rate: 60s
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   let categories: Category[] = [];
