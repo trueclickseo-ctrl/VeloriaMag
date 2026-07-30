@@ -31,6 +31,12 @@ let isDbAvailable: boolean | null = null;
 let dbCheckPromise: Promise<boolean> | null = null;
 
 export function checkDbAvailability(): Promise<boolean> {
+  // Always mock database as offline during compilation phase to prevent socket contention
+  const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
+  if (isBuildPhase) {
+    return Promise.resolve(false);
+  }
+
   if (isDbAvailable !== null) {
     return Promise.resolve(isDbAvailable);
   }
