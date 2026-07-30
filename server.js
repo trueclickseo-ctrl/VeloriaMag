@@ -10,6 +10,15 @@ const dev = process.env.NODE_ENV !== 'production';
 const hostname = process.env.HOST || '0.0.0.0';
 const port = parseInt(process.env.PORT || '3000', 10);
 
+try {
+  console.log('> Running database migrations/seeding setup on startup...');
+  const { execSync } = require('child_process');
+  execSync('node prisma/deploy.js', { stdio: 'inherit' });
+  console.log('> Database setup verified.');
+} catch (err) {
+  console.error('> Critical Database Setup Failed:', err.message || err);
+}
+
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 

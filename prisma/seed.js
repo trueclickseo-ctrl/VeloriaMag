@@ -1,7 +1,32 @@
 const { PrismaClient } = require('@prisma/client');
-const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
 
-const adapter = new PrismaBetterSqlite3({ url: 'file:./dev.db' });
+function parseDbUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return {
+      host: parsed.hostname,
+      port: parseInt(parsed.port || '3306', 10),
+      user: parsed.username,
+      password: decodeURIComponent(parsed.password),
+      database: parsed.pathname.replace(/^\//, ''),
+      connectionLimit: 5,
+    };
+  } catch (e) {
+    return {
+      host: 'localhost',
+      port: 3306,
+      user: 'u104700239_coaAv',
+      password: '',
+      database: 'u104700239_coaAv',
+      connectionLimit: 5,
+    };
+  }
+}
+
+const dbUrl = process.env.DATABASE_URL || 'mysql://u104700239_coaAv:password@localhost:3306/u104700239_coaAv';
+const poolConfig = parseDbUrl(dbUrl);
+const adapter = new PrismaMariaDb(poolConfig);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
