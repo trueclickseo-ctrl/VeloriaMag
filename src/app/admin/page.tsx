@@ -8,9 +8,56 @@ import {
 
 export const revalidate = 0; // Dynamic rendering always
 
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Author {
+  id: string;
+  name: string;
+  qualifications?: string;
+  expertise?: string;
+  bio?: string;
+  slug?: string;
+  articles?: Article[];
+}
+
+interface Article {
+  id: string;
+  title: string;
+  slug: string;
+  publishedAt: Date;
+  seoScore?: number | null;
+  contentScore?: number | null;
+  trustScore?: number | null;
+  discoverTitle?: string | null;
+  emotionalHook?: string | null;
+  topicCluster?: string | null;
+  imageConcept?: string | null;
+  imageStyle?: string | null;
+  imageAlt?: string | null;
+  author?: Author;
+  category?: Category;
+}
+
+interface Entity {
+  id: string;
+}
+
+interface Product {
+  id: string;
+  brand: string;
+  name: string;
+  category: string;
+  disclosureStatus: string;
+}
+
+
 export default async function AdminDashboard() {
   // Fetch real articles from SQLite
-  const articles = await prisma.article.findMany({
+  const articles = (await prisma.article.findMany({
     include: {
       author: true,
       category: true,
@@ -18,16 +65,16 @@ export default async function AdminDashboard() {
     orderBy: {
       publishedAt: 'desc',
     },
-  });
+  })) as Article[];
 
-  const entities = await prisma.entity.findMany({});
-  const authors = await prisma.author.findMany({
+  const entities = (await prisma.entity.findMany({})) as Entity[];
+  const authors = (await prisma.author.findMany({
     include: {
       articles: true,
     },
-  });
+  })) as Author[];
 
-  const products = await prisma.product.findMany({});
+  const products = (await prisma.product.findMany({})) as Product[];
 
   // 1. Keyword Opportunity Scoring System Data
   const keywordPriorities = [
