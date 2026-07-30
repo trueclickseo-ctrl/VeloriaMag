@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { ArticleCard } from '@/components/SharedComponents';
 import Link from 'next/link';
+import { Author } from '@/types';
 
 interface Props {
   params: Promise<{
@@ -16,7 +17,7 @@ export default async function AuthorProfilePage({ params }: Props) {
   const resolvedParams = await params;
   const { slug } = resolvedParams;
 
-  const author = await prisma.author.findUnique({
+  const author = (await prisma.author.findUnique({
     where: { slug },
     include: {
       articles: {
@@ -25,7 +26,7 @@ export default async function AuthorProfilePage({ params }: Props) {
         },
       },
     },
-  });
+  })) as Author | null;
 
   if (!author) {
     notFound();
@@ -54,7 +55,7 @@ export default async function AuthorProfilePage({ params }: Props) {
           Articles Authored by {author.name}
         </h2>
         
-        {author.articles.length === 0 ? (
+        {!author.articles || author.articles.length === 0 ? (
           <p className="text-sm text-gray-500">No articles published yet.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -63,7 +64,7 @@ export default async function AuthorProfilePage({ params }: Props) {
                 key={art.id}
                 title={art.title}
                 slug={art.slug}
-                category={art.category.slug}
+                category={art.category?.slug || ''}
                 excerpt={art.excerpt}
                 date={art.publishedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 authorName={author.name}
