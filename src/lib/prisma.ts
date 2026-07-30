@@ -75,6 +75,12 @@ function createPrismaClient() {
   const adapter = new PrismaMariaDb(poolConfig);
   const client = new PrismaClient({ adapter });
 
+  // Wrap client with Proxy only during next build phase to prevent database connection timeouts when DB is absent
+  const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
+  if (!isBuildPhase) {
+    return client;
+  }
+
   // Wrap client with Proxy to intercept queries when DB is unreachable
   return new Proxy(client, {
     get(target: any, prop: string): any {
