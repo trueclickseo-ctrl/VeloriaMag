@@ -72,8 +72,24 @@ export function checkDbAvailability(): Promise<boolean> {
 function createPrismaClient() {
   const dbUrl = process.env.DATABASE_URL || 'mysql://u104700239_coaAv:password@localhost:3306/u104700239_coaAv';
   const poolConfig = parseDbUrl(dbUrl);
+
+  console.log('[Prisma Diagnostic] Host:', poolConfig.host);
+  console.log('[Prisma Diagnostic] Port:', poolConfig.port);
+  console.log('[Prisma Diagnostic] User:', poolConfig.user);
+  console.log('[Prisma Diagnostic] Database:', poolConfig.database);
+  console.log('[Prisma Diagnostic] ConnectionLimit:', poolConfig.connectionLimit);
+
   const adapter = new PrismaMariaDb(poolConfig);
   const client = new PrismaClient({ adapter });
+
+  // Startup diagnostic connection test
+  client.$connect()
+    .then(() => {
+      console.log('[Prisma Diagnostic] ✅ Connection test succeeded!');
+    })
+    .catch((err: any) => {
+      console.error('[Prisma Diagnostic] ❌ Connection test failed:', err);
+    });
 
   // Wrap client with Proxy only during next build phase to prevent database connection timeouts when DB is absent
   const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
