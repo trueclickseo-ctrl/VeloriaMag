@@ -30,14 +30,44 @@ socket.setTimeout(2000);
 
 socket.on('connect', () => {
   socket.destroy();
-  console.log('🔌 Database is reachable. Running migrations and seed...');
+  console.log('🔌 Database is reachable. Starting database setup...');
+  
+  let success = false;
+  
+  // Try npx prisma migrate deploy first
   try {
-    execSync('npx prisma db push --skip-generate', { stdio: 'inherit' });
-    execSync('node prisma/seed.js', { stdio: 'inherit' });
-    console.log('✅ Migration and seeding completed successfully!');
+    console.log('🔄 Attempting to run migrations (prisma migrate deploy)...');
+    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+    success = true;
+    console.log('✅ Migrations applied successfully.');
   } catch (err) {
-    console.error('❌ Migration/Seed failed:', err.message);
-    process.exit(1);
+    console.warn('⚠️ Migration deploy failed or returned an error. Attempting db push fallback...');
+    console.warn(`Reason: ${err.message || err}`);
+  }
+
+  // Fallback to npx prisma db push if migrate deploy failed
+  if (!success) {
+    try {
+      console.log('🔄 Running database schema push (prisma db push)...');
+      execSync('npx prisma db push', { stdio: 'inherit' });
+      success = true;
+      console.log('✅ Database schema pushed successfully.');
+    } catch (pushErr) {
+      console.error('❌ Database schema push failed:', pushErr.message || pushErr);
+      process.exit(1);
+    }
+  }
+
+  // Run database seeding if database setup succeeded
+  if (success) {
+    try {
+      console.log('🌱 Seeding database (node prisma/seed.js)...');
+      execSync('node prisma/seed.js', { stdio: 'inherit' });
+      console.log('✅ Database seeding completed successfully.');
+    } catch (seedErr) {
+      console.error('❌ Seeding failed:', seedErr.message || seedErr);
+      // Don't fail the build just because seeding failed if tables were successfully created
+    }
   }
 });
 

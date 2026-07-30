@@ -12,8 +12,8 @@ npx prisma generate
 echo "🔨 Building Next.js app..."
 npm run build
 
-echo "🗄️  Running Prisma migrations..."
-npx prisma migrate deploy
+echo "🗄️  Running database migrations and setup..."
+node prisma/deploy.js
 
 echo "✅ Build complete! Restart your Node.js app in hPanel."
 echo "Go to: hPanel → Node.js → Restart"
