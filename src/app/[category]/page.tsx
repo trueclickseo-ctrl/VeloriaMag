@@ -3,6 +3,35 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { ArticleCard } from '@/components/SharedComponents';
 
+interface Pillar {
+  id: string;
+  title: string;
+  description: string;
+  slug: string;
+}
+
+interface Author {
+  name: string;
+}
+
+interface Article {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  publishedAt: Date;
+  author: Author;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  pillars: Pillar[];
+  articles: Article[];
+}
+
 interface Props {
   params: Promise<{
     category: string;
@@ -15,7 +44,7 @@ export default async function CategoryPage({ params }: Props) {
   const resolvedParams = await params;
   const categorySlug = resolvedParams.category;
 
-  const category = await prisma.category.findUnique({
+  const category = (await prisma.category.findUnique({
     where: { slug: categorySlug },
     include: {
       pillars: true,
@@ -25,7 +54,7 @@ export default async function CategoryPage({ params }: Props) {
         },
       },
     },
-  });
+  })) as Category | null;
 
   if (!category) {
     notFound();
